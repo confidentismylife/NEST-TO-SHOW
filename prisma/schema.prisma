@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id     Int     @id @default(autoincrement()) // MySQL 主键使用 auto-increment
+  userId String  @unique
+  topics Topic[] // 用户的所有主题
+}
+
+model Topic {
+  id      Int           @id @default(autoincrement()) // 使用 MySQL 自增主键
+  userId  String // 外键字段
+  user    User          @relation(fields: [userId], references: [userId]) // 外键关系
+  avatar  String
+  content String
+  images  Json // 使用 JSON 格式字段存储图片列表
+  options TopicOption[] // 主题的所有选项
+  records Record[] // 主题的所有记录
+
+  // 为 `Record` 模型的外键关系添加的反向关系字段
+}
+
+model TopicOption {
+  id      Int    @id @default(autoincrement()) // 使用 MySQL 自增主键
+  topicId Int
+  topic   Topic  @relation(fields: [topicId], references: [id]) // 外键关系
+  key     String
+  value   Int
+
+  @@index([topicId]) // 添加索引以提高性能
+}
+
+model Record {
+  id      Int    @id @default(autoincrement()) // 使用 MySQL 自增主键
+  topicId Int
+  userId  String
+  choice  String
+
+  // 外键关系
+  topic Topic @relation(fields: [topicId], references: [id]) // 外键关系
+}
